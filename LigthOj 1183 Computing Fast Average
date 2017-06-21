@@ -1,0 +1,124 @@
+/*   Whenever we update a range that lies in our update query [l..r], we update it and set a lazy value for its children,
+     indicating that the value at those nodes have to be updated.
+
+Note : We just have to check that the current node must not have a lazy value, to get the correct answer.
+i.e : lazy k emon vabe initialize korte hobe jeno oi value diye kono point na thekey...r oivabe code change kora lagbe ;)
+update,query --- logn
+*/
+
+#include<bits/stdc++.h>
+#define LL long long
+#define pb push_back
+#define mx 100005
+using namespace std;
+
+int arr[mx];
+
+int lazy[4*mx];
+int seg_tree[mx * 4];
+
+
+
+void build(int node_num,int s,int e) // [s..e] is the range of node:- node_num
+{
+    if(s==e) // We reach a leaf node
+    {
+      seg_tree[node_num] = arr[s];
+      return;
+    }
+    int m = (s+e)/2; // splitting the current range
+    build(node_num*2,s,m); // building then left subtree
+    build(node_num*2+1,m+1,e); // building the right subtree
+
+    // Updating value at current node after building its left and right subtree
+
+    seg_tree[node_num] = seg_tree[node_num*2] + seg_tree[node_num*2+1];
+
+   return;
+}
+
+void lazy_update(int s,int e,int node_num)
+{
+  seg_tree[node_num] = (e-s+1) * lazy[node_num];
+  if(e>s)
+    lazy[node_num*2] = lazy[node_num*2+1] = lazy[node_num];
+  lazy[node_num] = -1;
+}
+
+void set_lazy(int s,int e,int new_val,int node_num)
+{
+   if(e>s)
+   {
+     int m = (s+e)/2;
+     lazy[node_num*2] = lazy[node_num*2+1] = new_val;
+   }
+}
+void range_update(int node_num,int s,int e,int l,int r,int new_val)
+{
+  if(lazy[node_num]!=-1)
+    lazy_update(s,e,node_num);
+  if(s>r || e<l)
+    return;
+  else if(s>=l && e<= r)
+    seg_tree[node_num] = (e-s+1)*new_val , set_lazy(s,e,new_val,node_num);
+  else
+  {
+    int m = (s+e)/2;
+    range_update(node_num*2,s,m,l,r,new_val);
+    range_update(node_num*2+1,m+1,e,l,r,new_val);
+    seg_tree[node_num] = seg_tree[node_num*2] + seg_tree[node_num*2+1];
+  }
+}
+
+int query(int node_num,int s,int e,int l, int r)
+{
+ if(lazy[node_num]!=-1)
+    lazy_update(s,e,node_num);
+ if(s>r || e<l)
+   return 0;
+ else if(s>=l && e<=r)
+   return seg_tree[node_num];
+ else
+ {
+   int m = (s+e)/2;
+   return query(node_num*2,s,m,l,r) + query(node_num*2+1,m+1,e,l,r);
+ }
+}
+
+int main()
+{
+    int t; scanf("%d",&t);
+    for(int tt=1;tt<=t;tt++){
+    printf("Case %d:\n",tt);
+    for(int i=1;i<4*mx;i++) lazy[i] = -1;
+    int n,q;
+    scanf("%d %d",&n,&q);
+    for(int i=1;i<=n;i++) arr[i] = 0;
+
+    build(1,1,n);
+
+    while(q--){
+    int type;
+    scanf("%d",&type);
+    if(type==1){
+        int i,j,v;
+        scanf("%d %d %d",&i,&j,&v);
+        i++,j++;
+        range_update(1,1,n,i,j,v);
+    }
+    else{
+        int i,j;
+        scanf("%d %d",&i,&j);
+        i++,j++;
+        int sum = query(1,1,n,i,j);
+        int N = j-i+1;
+        if(sum%N==0) printf("%d\n",sum/N);
+        else{
+            int G = __gcd(sum,N);
+            printf("%d/%d\n",sum/G,N/G);
+        }
+      }
+     }
+    }
+}
+
