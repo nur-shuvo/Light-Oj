@@ -1,9 +1,11 @@
-/*   Whenever we update a range that lies in our update query [l..r], we update it and set a lazy value for its children,
-     indicating that the value at those nodes have to be updated.
+/*   
+Whenever we update a range that lies in our update query [l..r], we update it and set a lazy value for its children,
+indicating that the value at those nodes have to be updated.
 
 Note : We just have to check that the current node must not have a lazy value, to get the correct answer.
 i.e : lazy k emon vabe initialize korte hobe jeno oi value diye kono point na thekey...r oivabe code change kora lagbe ;)
 update,query --- logn
+
 */
 
 #include<bits/stdc++.h>
